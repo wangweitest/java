@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Test;
@@ -101,8 +104,8 @@ public class TestStreamaAPI {
 	@Test
 	public void test5(){
 		emps.parallelStream()
-			.filter((e) -> e.getSalary() >= 5000)
-			.skip(2)
+			.filter((e) -> e.getSalary() >= 5000 && e.getAge()>8)
+			//.skip(2)
 			.forEach(System.out::println);
 	}
 	
@@ -111,5 +114,22 @@ public class TestStreamaAPI {
 		emps.stream()
 			.distinct()
 			.forEach(System.out::println);
+	}
+	
+	//自定义规则去重或者过滤
+	@Test
+	public void test7(){
+		Map<Object, Boolean> seen1 = new ConcurrentHashMap<>();
+		//putIfAbsent如果传入key对应的value已经存在，就返回存在的value，不进行替换。如果不存在，就添加key和value，返回null
+		//这里的key值要注意，数字的最好是转换成字符串，因为两个不同的数字加起来可能相等，就出问题了
+		emps.forEach(System.out::println);
+		
+		System.out.println("-----------------------------------------");
+		
+		emps = emps.stream().filter(d -> {
+			return seen1.putIfAbsent(d.getId()+"---"+d.getName(), Boolean.TRUE) == null;
+		}).collect(Collectors.toList());
+		
+		emps.forEach(System.out::println);
 	}
 }
